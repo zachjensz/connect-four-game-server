@@ -7,6 +7,10 @@
     "serve": "vite preview"
   },
   "devDependencies": {
+    "nodemon": "^2.0.12",
     "vite": "^2.4.4"
+  },
+  "dependencies": {
+    "socket.io": "^4.1.3"
   }
 }
