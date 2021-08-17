@@ -10,23 +10,23 @@ const io = require("socket.io")(PORT, {
 io.on("connection", (socket) => addClient(socket))
 
 function addClient(socket) {
-  const eventHandlers = []
+  const emitHandlers = []
   clientSockets.push(socket)
 
   console.log(`${socket.id} has joined`)
 
-  eventHandlers.push(['disconnect', () => {
+  emitHandlers.push(['disconnect', () => {
     console.log(`${socket.id} has left`)
   }])
 
-  eventHandlers.push(['find-opponent', () => {
+  emitHandlers.push(['find-opponent', () => {
     console.log(`${socket.id} is looking for an opponent`)
   }])
 
-  eventHandlers.push(['drop',  (column) => {
+  emitHandlers.push(['drop',  (column) => {
     console.log(`${socket.id} drops in column ${column}`)
     socket.broadcast.emit("drop", column)
   }])
 
-  eventHandlers.forEach(([name, handler]) => socket.on(name, handler))
+  emitHandlers.forEach(([name, handler]) => socket.on(name, handler))
 }
