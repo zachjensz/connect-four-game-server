@@ -15,18 +15,22 @@ function addClient(socket) {
 
   console.log(`${socket.id} has joined`)
 
+  // player has disconnected 
   emitHandlers.push(['disconnect', () => {
     console.log(`${socket.id} has left`)
   }])
 
+  // player is looking for an opponent
   emitHandlers.push(['find-opponent', () => {
     console.log(`${socket.id} is looking for an opponent`)
   }])
 
+  // player made a drop
   emitHandlers.push(['drop',  (column) => {
     console.log(`${socket.id} drops in column ${column}`)
     socket.broadcast.emit("drop", column)
   }])
 
+  // Adds all of the emit handlers
   emitHandlers.forEach(([name, handler]) => socket.on(name, handler))
 }
