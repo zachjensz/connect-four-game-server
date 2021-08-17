@@ -2,7 +2,7 @@
   "name": "connect-four-game-server",
   "version": "0.0.0",
   "scripts": {
-    "dev": "vite",
+    "dev": "nodemon main.js",
     "build": "vite build",
     "serve": "vite preview"
   },
