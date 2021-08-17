@@ -7,8 +7,12 @@ const io = require('socket.io')(PORT, {
 })
 
 io.on('connection', (socket) => {
-  console.log(socket.id)
+  console.log(socket.id + ' has joined')
   socket.on('drop', (column) => {
+    console.log(column)
     socket.broadcast.emit('drop', column)
+  })
+  socket.on('disconnect', () => {
+    console.log(socket.id + ' has left')
   })
 })
