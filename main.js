@@ -41,7 +41,9 @@ function addClient(socket) {
         console.log(`${socket.id} is waiting for an opponent`)
         return
       }
-      socket.emit('opponent-found', opponent)      
+      const opponentSocket = getSocketById(opponent)
+      socket.emit('opponent-found', opponent)
+      opponentSocket.emit('opponent-found', socket.id)
       console.log(`${socket.id} is playing a game with ${opponent}`)
     },
   ])
