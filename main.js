@@ -1,4 +1,3 @@
-const clientSockets = []
 const PORT = 5000
 const io = require("socket.io")(PORT, {
   cors: {
@@ -8,8 +7,12 @@ const io = require("socket.io")(PORT, {
 })
 io.on("connection", (socket) => addClient(socket))
 
-const lookingForOpponents = []
+const clientSockets = []
+function getSocketById(id) {
+  
+}
 
+const lookingForOpponents = []
 function addClient(socket) {
   const emitHandlers = []
   clientSockets.push(socket)
@@ -29,7 +32,7 @@ function addClient(socket) {
     "find-opponent",
     () => {
       console.log(`${socket.id} is looking for an opponent`)
-      // The !lookingForOpponents is because push returns new length
+      // The (! in) !lookingForOpponents is because push returns new length
       const opponent =
         lookingForOpponents.length === 0
           ? !lookingForOpponents.push(socket.id)
@@ -38,6 +41,7 @@ function addClient(socket) {
         console.log(`${socket.id} is waiting for an opponent`)
         return
       }
+      socket.emit('opponent-found', opponent)      
       console.log(`${socket.id} is playing a game with ${opponent}`)
     },
   ])
