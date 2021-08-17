@@ -8,5 +8,7 @@ const io = require('socket.io')(PORT, {
 
 io.on('connection', (socket) => {
   console.log(socket.id)
-  socket.on('drop', () => {})
+  socket.on('drop', (column) => {
+    socket.broadcast.emit(column)
+  })
 })
