@@ -1,3 +1,4 @@
+// Setup server on port 5000 and listen for connections
 const PORT = 5000
 const io = require("socket.io")(PORT, {
   cors: {
@@ -7,9 +8,11 @@ const io = require("socket.io")(PORT, {
 })
 io.on("connection", (socket) => addClient(socket))
 
+// All of the sockets for all of the clients
 const clientSockets = []
 const getSocketById = (id) => clientSockets.find(socket => socket.id === id)
 
+// Games in-progress
 const gamesBeingPlayed = []
 
 // The socket.id's of players looking for opponents
