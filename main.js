@@ -9,9 +9,18 @@ io.on("connection", (socket) => addClient(socket))
 
 const clientSockets = []
 function getSocketById(id) {
-  
+  let client = null
+  clientSockets.forEach(c => {
+    if (c.id === id) {
+      client = c
+    }    
+  })
+  return client
 }
 
+const gamesBeingPlayed = []
+
+// The socket.id's of players looking for opponents
 const lookingForOpponents = []
 function addClient(socket) {
   const emitHandlers = []
@@ -33,18 +42,23 @@ function addClient(socket) {
     () => {
       console.log(`${socket.id} is looking for an opponent`)
       // The (! in) !lookingForOpponents is because push returns new length
-      const opponent =
+      const opponentId =
         lookingForOpponents.length === 0
           ? !lookingForOpponents.push(socket.id)
           : lookingForOpponents.shift()
-      if (!opponent) {
+      if (!opponentId) {
         console.log(`${socket.id} is waiting for an opponent`)
         return
       }
-      const opponentSocket = getSocketById(opponent)
-      socket.emit('opponent-found', opponent)
+      const opponentSocket = getSocketById(opponentId)
+      socket.emit('opponent-found', opponentId)
       opponentSocket.emit('opponent-found', socket.id)
-      console.log(`${socket.id} is playing a game with ${opponent}`)
+      gamesBeingPlayed.push({
+        startingPlayer: randomPlayer(),
+        opponentId,
+        opponentSocket
+      })
+      console.log(`${socket.id} is playing a game with ${opponentId}`)
     },
   ])
 
@@ -60,3 +74,5 @@ function addClient(socket) {
   // Adds all of the emit handlers
   emitHandlers.forEach(([name, handler]) => socket.on(name, handler))
 }
+
+const randomPlayer = () => Math.floor(Math.random() * 2)
