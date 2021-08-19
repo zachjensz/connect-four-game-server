@@ -8,15 +8,7 @@ const io = require("socket.io")(PORT, {
 io.on("connection", (socket) => addClient(socket))
 
 const clientSockets = []
-function getSocketById(id) {
-  let client = null
-  clientSockets.forEach(c => {
-    if (c.id === id) {
-      client = c
-    }    
-  })
-  return client
-}
+const getSocketById = (id) => clientSockets.find(socket => socket.id === id)
 
 const gamesBeingPlayed = []
 
