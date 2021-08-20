@@ -1,6 +1,7 @@
 {
   "name": "connect-four-game-server",
   "version": "0.0.0",
+  "private": true,
   "scripts": {
     "dev": "nodemon main.js",
     "build": "vite build",
@@ -11,6 +12,7 @@
     "vite": "^2.4.4"
   },
   "dependencies": {
+    "fs": "0.0.1-security",
     "socket.io": "^4.1.3"
   }
 }
