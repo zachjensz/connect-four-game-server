@@ -38,14 +38,14 @@ io.on("connection", (socket) => addClient(socket))
 // All of the sockets for all of the clients
 const clientSockets = []
 const getSocketById = (id) => clientSockets.find((socket) => socket.id === id)
-const removeSocketById = (id) => clientSockets.filter((ele) => ele.id != socket.id)
+const removeSocketById = (id) => clientSockets.filter((socket) => socket.id !== id)
 
 // Games in-progress
 const gamesBeingPlayed = []
 
 function removeFromLookingFor(socketId) {
   lookingForOpponents =
-    lookingForOpponents.filter((ele) => ele != socketId)
+    lookingForOpponents.filter((ele) => ele !== socketId)
 }
 
 // The socket.id's of players looking for opponents
