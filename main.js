@@ -20,9 +20,9 @@ const getSavedState = () => {
 }
 
 let dbData = getSavedState() ?? {
-  test: 'Hello DB'
+  test: "Hello DB",
 }
-dbData['save'] = () => setSavedState(dbData)
+dbData["save"] = () => setSavedState(dbData)
 dbData.save()
 
 // Setup server on port 5000 and listen for connections
@@ -30,7 +30,7 @@ const PORT = 5000
 const io = socket(PORT, {
   cors: {
     //origin: ['http://localhost:3000', 'http://connectfourgame.com:80']
-   origin: "*", // Yikes!!!
+    origin: "*", // Yikes!!!
   },
 })
 io.on("connection", (socket) => addClient(socket))
@@ -38,14 +38,24 @@ io.on("connection", (socket) => addClient(socket))
 // All of the sockets for all of the clients
 const clientSockets = []
 const getSocketById = (id) => clientSockets.find((socket) => socket.id === id)
-const removeSocketById = (id) => clientSockets.filter((socket) => socket.id !== id)
+const removeSocketById = (id) =>
+  clientSockets.filter((socket) => socket.id !== id)
 
 // Games in-progress
 const gamesBeingPlayed = []
+const getGameBeingPlayed = (id) =>
+  gamesBeingPlayed.find(
+    (game) => game.player1Socket.id === id || game.player2Socket.id === id
+  )
+
+const findOpponentSocket = (id) => {
+  const game = getGameBeingPlayed(id)
+  if (!game) return
+  return game.player1Socket.id === id ? game.player2Socket : game.player1Socket
+}
 
 function removeFromLookingFor(socketId) {
-  lookingForOpponents =
-    lookingForOpponents.filter((ele) => ele !== socketId)
+  lookingForOpponents = lookingForOpponents.filter((ele) => ele !== socketId)
 }
 
 // The socket.id's of players looking for opponents
@@ -82,17 +92,21 @@ function addClient(socket) {
       }
 
       const opponentSocket = getSocketById(opponentId)
-      removeFromLookingFor(socket.id)      
+      removeFromLookingFor(socket.id)
       removeFromLookingFor(opponentSocket.id)
       // Emit to both players that an opponent was found
       const startingPlayer = randomPlayer()
-      socket.emit("opponent-found", { id: opponentId, startingPlayer: !!startingPlayer })
-      opponentSocket.emit("opponent-found", {id: socket.id, startingPlayer: !startingPlayer })
+      socket.emit("opponent-found", {
+        id: opponentId,
+        startingPlayer: !!startingPlayer,
+      })
+      opponentSocket.emit("opponent-found", {
+        id: socket.id,
+        startingPlayer: !startingPlayer,
+      })
       gamesBeingPlayed.push({
-        startingPlayer,
-        opponentId,
-        opponentSocket,
-        socket
+        player1Socket: socket,
+        player2Socket: opponentSocket,
       })
       console.log(`${socket.id} is playing a game with ${opponentId}`)
     },
@@ -102,8 +116,11 @@ function addClient(socket) {
   emitHandlers.push([
     "drop",
     (column) => {
-      console.log(`${socket.id} drops in column ${column}`)
-      socket.broadcast.emit("drop", column)
+      const opponentSocket = findOpponentSocket(socket.id)
+      console.log(
+        `${socket.id} drops in column ${column} (playing against ${opponentSocket.id})`
+      )
+      opponentSocket.emit("drop", column)
     },
   ])
 
@@ -112,4 +129,3 @@ function addClient(socket) {
 }
 
 const randomPlayer = () => Math.floor(Math.random() * 2)
-
