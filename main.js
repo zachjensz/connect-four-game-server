@@ -107,6 +107,7 @@ function addClient(socket) {
       gamesBeingPlayed.push({
         player1Socket: socket,
         player2Socket: opponentSocket,
+        playerTurn: startingPlayer,
       })
       console.log(`${socket.id} is playing a game with ${opponentId}`)
     },
@@ -116,11 +117,23 @@ function addClient(socket) {
   emitHandlers.push([
     "drop",
     (column) => {
-      const opponentSocket = findOpponentSocket(socket.id)
+      const game = getGameBeingPlayed(socket.id)
+      if (!game) return
+      const playerNumber = game.player1Socket.id === socket.id ? 1 : 2
+      if (playerNumber != game.playerTurn) {
+        console.warn(`${socket.id} is trying to play when it's not their turn`)
+        return
+      }
+
+      const opponentSocket =
+        game.player1Socket.id === socket.id
+          ? game.player2Socket
+          : game.player1Socket
       console.log(
         `${socket.id} drops in column ${column} (playing against ${opponentSocket.id})`
       )
       opponentSocket.emit("drop", column)
+      game.playerTurn = playerNumber === 1 ? 2 : 1
     },
   ])
 
