@@ -1,0 +1,11 @@
+### GET
+GET http://localhost:3000/users
+
+### POST
+POST http://localhost:3000/users
+Content-Type: application/json
+
+{
+    "name": "Josh",
+    "password": "123"
+}

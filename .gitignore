@@ -3,7 +3,7 @@ node_modules
 dist
 dist-ssr
 *.local
-server.db
-yarn.lock
+database.json
 package-lock.json
-
+yarn.lock
+yarn-error.log
