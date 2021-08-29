@@ -50,8 +50,7 @@ const getGameBeingPlayed = (id) =>
 
 const findOpponentSocket = (id) => {
   const game = getGameBeingPlayed(id)
-  if (!game) return
-  return game.player1Socket.id === id ? game.player2Socket : game.player1Socket
+  return game?.player1Socket.id === id ? game.player2Socket : game?.player1Socket
 }
 
 function removeFromLookingFor(socketId) {

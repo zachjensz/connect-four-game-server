@@ -4,3 +4,6 @@ dist
 dist-ssr
 *.local
 server.db
+yarn.lock
+package-lock.json
+
