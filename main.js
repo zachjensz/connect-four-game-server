@@ -1,5 +1,7 @@
 const db = require("./db.js").db
 
+const { v4: uuid } = require('uuid');
+
 const bcrypt = require("bcrypt")
 const express = require("express")
 const app = express()
@@ -18,9 +20,11 @@ app.get("/users", (req, res) => {
 
 app.post("/users", async (req, res) => {
   try {
+    const uid = uuid()
     const password = req.body.password
     const hashedPassword = await bcrypt.hash(password, 10)
     const user = {
+      uid,
       name: req.body.name,
       password: hashedPassword,
     }
