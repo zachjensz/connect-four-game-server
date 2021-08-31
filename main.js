@@ -19,8 +19,7 @@ app.get("/users", (req, res) => {
 app.post("/users", async (req, res) => {
   try {
     const password = req.body.password
-    const salt = await bcrypt.genSalt()
-    const hashedPassword = await bcrypt.hash(password, salt)
+    const hashedPassword = await bcrypt.hash(password, 10)
     const user = {
       name: req.body.name,
       password: hashedPassword,
@@ -35,4 +34,23 @@ app.post("/users", async (req, res) => {
   }
 })
 
-app.listen(3000)
+app.post("/users/login", async (req, res) => {
+  const badLogin = 'Username or password is incorrect'
+  const users = getUsers()
+  const user = users.find((user) => user.name = req.body.name)
+  if (user === null)
+    return res.status(400).send(badLogin)
+  try {
+    return (await bcrypt.compare(req.body.password, user.password)) ? 
+      res.status(200).send("Login approved") :
+      res.status(400).send(badLogin)
+  } catch {
+    return res.status(500).send()
+  }
+})
+
+try {
+  app.listen(5000)
+} catch (error) {
+  console.error(error)
+}

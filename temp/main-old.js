@@ -53,7 +53,7 @@ function addClient(socket) {
       removeFromLookingFor(socket.id)
     },
   ])
-
+  
   // player is looking for an opponent
   emitHandlers.push([
     "find-opponent",

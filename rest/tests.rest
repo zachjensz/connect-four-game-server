@@ -1,8 +1,8 @@
 ### GET
-GET http://localhost:3000/users
+GET http://localhost:5000/users
 
 ### POST
-POST http://localhost:3000/users
+POST http://localhost:5000/users
 Content-Type: application/json
 
 {
