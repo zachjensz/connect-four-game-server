@@ -1,11 +1,29 @@
-### GET
-GET http://localhost:5000/users
-
-### POST
-POST http://localhost:5000/users
+### Sign-Up
+POST http://localhost:5000/join
 Content-Type: application/json
 
 {
-    "name": "Josh",
+    "name": "Some Guy",
     "password": "123"
 }
+
+### Login
+POST http://localhost:5000/login
+Content-Type: application/json
+
+{
+    "name": "Some Guy",
+    "password": "123"
+}
+
+### Refresh Access Token
+POST http://localhost:5000/refresh-access
+Content-Type: application/json
+
+{
+    "token": "[REFRESH_TOKEN]"
+}
+
+### Logout to remove refresh tokens
+DELETE http://localhost:5000/logout
+Authorization: Bearer [ACCESS_TOKEN]
