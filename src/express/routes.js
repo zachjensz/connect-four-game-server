@@ -1,35 +1,19 @@
-require("dotenv").config()
 const { v4: uuid } = require("uuid")
 const bcrypt = require("bcrypt")
-const express = require("express")
-const cors = require("cors")
+const crypto = require('crypto')
 const jwt = require("jsonwebtoken")
-const db = require("./db.js").db
+const db = require("../util/db.js").db
 const {
-  authorizeToken,
-  setAuthToken,
   generateAccessToken,
   generateRefreshToken,
 } = require("./helper.js")
 
-const app = express()
-app.use(express.json())
-app.use(cors({ origin: true }))
-
-// Database
-console.log(db.JSON())
-db.set("gamesStartedSinceServerStart", 0)
-db.set("gamesFinishedSinceServerStart", 0)
+const randomBytes = (size) => crypto.randomBytes(size).toString('hex')
 
 const getUsers = () => db.get("users") ?? []
 
-// Get all users
-app.get("/users", setAuthToken, authorizeToken, (req, res) => {
-  res.json(getUsers())
-})
-
 // add a new user
-app.post("/join", async (req, res) => {
+exports.join = async (req, res) => {
   try {
     const uid = uuid()
     const password = req.body.password
@@ -47,10 +31,10 @@ app.post("/join", async (req, res) => {
     console.error(error)
     res.status(500).send()
   }
-})
+}
 
 // Login
-app.post("/login", async (req, res) => {
+exports.login = async (req, res) => {
   const badLogin = "Username or password is incorrect"
   const users = getUsers()
   const user = users.find((user) => (user.name = req.body.name))
@@ -78,15 +62,9 @@ app.post("/login", async (req, res) => {
     console.error(error)
     return res.status(500).send()
   }
-})
-
-try {
-  app.listen(5000)
-} catch (error) {
-  console.error(error)
 }
 
-app.post("/refresh-access", (req, res) => {
+exports.refreshAccess = (req, res) => {
   const refreshToken = req.body.token
   if (refreshToken === null) return res.sendStatus(401)
   const refreshTokens = db.get("tokens") ?? []
@@ -100,9 +78,9 @@ app.post("/refresh-access", (req, res) => {
     const accessToken = generateAccessToken(payload)
     res.json({ accessToken })
   })
-})
+}
 
-app.delete("/logout", setAuthToken, authorizeToken, (req, res) => {
+exports.logout = (req, res) => {
   const { uid: userID } = jwt.decode(req.authToken)
 
   // // Saves the refresh token in the database
@@ -117,4 +95,18 @@ app.delete("/logout", setAuthToken, authorizeToken, (req, res) => {
   // Save the DB and return response
   db.set("tokens", refreshTokens)
   res.sendStatus(204)
-})
+}
+
+// Give the user enough information to start an encrypted session with the server
+exports.connect = async (req, res) => {
+  // Generate a random uuid and 64 byte key to use for AES
+  // The uuid only tells the server which encryption key the client is using
+  const uid = uuid()
+  const password = randomBytes(64)
+
+  // Save in DB, so socket.io server can use
+  
+
+  // Send an uuid and password to the user
+  res.json({ uid, password })
+}

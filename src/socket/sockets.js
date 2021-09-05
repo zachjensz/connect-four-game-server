@@ -1,24 +1,24 @@
 const socket = require("socket.io")
-const db = require("./db.js").db
-
-db.set('gamesStartedSinceServerStart', 0)
-db.set('gamesFinishedSinceServerStart', 0)
+const aes = require('aes256')
+const { db } = require("../util/db.js")
 
 // Setup server on port 5000 and listen for connections
-const PORT = 5000
+const PORT = 4000
 const io = socket(PORT, {
   cors: {
     //origin: ['http://localhost:3000', 'http://connectfourgame.com:80']
     origin: "*", // Yikes!!!
   },
 })
-io.on("connection", (socket) => addClient(socket))
 
 // All of the sockets for all of the clients
 const clientSockets = []
 const getSocketById = (id) => clientSockets.find((socket) => socket.id === id)
 const removeSocketById = (id) =>
   clientSockets.filter((socket) => socket.id !== id)
+
+// The socket.id's of players looking for opponents
+let lookingForOpponents = []
 
 // Games in-progress
 const gamesBeingPlayed = []
@@ -36,23 +36,64 @@ function removeFromLookingFor(socketId) {
   lookingForOpponents = lookingForOpponents.filter((ele) => ele !== socketId)
 }
 
-// The socket.id's of players looking for opponents
-let lookingForOpponents = []
-function addClient(socket) {
-  const emitHandlers = []
+// Deactivates the auth emit handler
+let authenticatedSockets = []
+
+// listening for connections to server
+io.on("connection", (socket) => {
+
+  // Add to collection of all connected clients
   clientSockets.push(socket)
 
-  console.log(`${socket.id} has joined`)
+  // Close unused connection in 3 seconds if not authenticated
+  const disconnectTimeout = setTimeout(() => {
+    socket.close()
+  }, 3000);
 
-  // player has disconnected
-  emitHandlers.push([
-    "disconnect",
-    () => {
-      console.log(`${socket.id} has left`)
-      removeSocketById(socket.id)
-      removeFromLookingFor(socket.id)
-    },
-  ])
+  socket.on("auth", (jwToken) => {
+    // Already authenticated - return
+    if (authenticatedSockets.includes(socket)) return
+
+    // TODO: Verifies that a valid JWT was received
+
+    // key-value pairs of a user's jwt and their ephemeral aes256 encryption key
+    const passwords = db.get('serverPasswords') ?? {}
+
+    // Did this user obtain a key from express server?
+    if (passwords.keys.includes(jwToken)) {
+      // Stop the auto-disconnection timeout
+      clearTimeout(disconnectTimeout)
+
+      // add an on disconnect clean-up
+      socket.on('disconnect', () => {
+        console.log(`${socket.id} has left`)
+        removeSocketById(socket.id)
+        removeFromLookingFor(socket.id)
+        authenticatedSockets = 
+          authenticatedSockets.filter((socket) => socket.id !== socket.id)
+      })
+
+      // Stop the client from authenticating after authenticated
+      authenticatedSockets.push(socket)
+
+      // The emit handler is the only socket.on event handler after authentication...
+      // It decrypts the encrypted payload and sends decrypted data to the messageHandler
+      socket.on("emit", (payload) => processEncryptedPayload(socket, jwToken, payload))      
+    }
+  })  
+})
+
+function processEncryptedPayload(socket, jwToken, payload) {
+  const passwords = db.get(serverPasswords) ?? {}
+  const password = passwords[jwToken]
+  if (!password) return
+  messageHandler(socket, jwToken, aes.decrypt(password, payload))
+}
+
+function messageHandler(socket, jwToken, message) {
+  const emitHandlers = []
+
+  console.log(`${socket.id} has joined`)
   
   // player is looking for an opponent
   emitHandlers.push([

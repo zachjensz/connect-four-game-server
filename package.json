@@ -6,15 +6,17 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "nodemon main.js --ignore ./database.json"
+    "start": "nodemon src/main.js --ignore ./database.json"
   },
   "dependencies": {
+    "aes256": "^1.1.0",
     "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
     "simple-json-db": "^1.2.3",
+    "socket.io": "^4.2.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
